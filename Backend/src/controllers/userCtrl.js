@@ -1,6 +1,15 @@
 import prisma from "../config/prisma.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
+ 
+export const getMe = async (req, res) => {
+  res.json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role?.toUpperCase() ,
+  });
+};
 
 export const register= async(req,res)=>{
     try{
@@ -23,7 +32,7 @@ export const register= async(req,res)=>{
         name,
         email,
         password:hashPassword,
-        role: role || 'USER',
+        role: role?.toUpperCase()  || 'USER',
     },
     });
 
@@ -64,14 +73,21 @@ export const login = async(req,res)=>{
             message:"Invalid credentials"
         });
      }
+     const token= generateToken(user.id);
+        res.cookie("token", token, {  
+            httpOnly: true,
+            secure:false,
+            sameSite: "lax",
+            maxAge: 5 * 24 * 60 * 60 * 1000, // 7 days
+        });
+
      return res.json({
         message:"Login successful",
-        token:generateToken(user.id),
         user:{
             id:user.id,
             name:user.name,
             email:user.email,
-            role:user.role
+            role:user.role,
         }
      });
     }catch(error){
@@ -80,3 +96,13 @@ export const login = async(req,res)=>{
         });
     }
 }
+
+export const logout = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false,
+  });
+
+  res.json({ message: "Logged out successfully" });
+};

@@ -1,14 +1,37 @@
 import { useEffect, useState } from "react";
-import { getMyBookings, cancelBooking } from "../lib/bookingApi";
+import {
+  getMyBookings,
+  getAdminBookings,
+  cancelBooking,
+  updateBookingStatus,
+} from "../lib/bookingApi";
+import { useAuth } from "../context/AuthContext";
 
 const Booking = () => {
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const handleStatusUpdate = async (bookingId, status) => {
+  try {
+    await updateBookingStatus(bookingId, status);
+    alert(`Booking marked as ${status}`);
+    fetchBookings();
+  } catch (err) {
+    alert(err.response?.data?.message || "Status update failed");
+  }
+};
+
   const fetchBookings = async () => {
     try {
-      const res = await getMyBookings();
-      // backend returns { bookings }
+      let res;
+
+      if (user?.role === "ADMIN") {
+        res = await getAdminBookings(); // 👑 admin bookings
+      } else {
+        res = await getMyBookings(); // 👤 user bookings
+      }
+
       setBookings(res.data.bookings);
     } catch (err) {
       console.error(err);
@@ -18,20 +41,20 @@ const Booking = () => {
   };
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    if (user) fetchBookings();
+  }, [user]);
 
   const handleCancel = async (bookingId) => {
     try {
       await cancelBooking(bookingId);
       alert("Booking cancelled ❌");
-      fetchBookings(); // refresh list
+      fetchBookings();
     } catch (err) {
       alert(err.response?.data?.message || "Cancel failed");
     }
   };
 
-  // 🔹 Loading state
+  /* 🔹 Loading */
   if (loading) {
     return (
       <div className="flex justify-center items-center h-60">
@@ -42,11 +65,11 @@ const Booking = () => {
     );
   }
 
-  // 🔹 No bookings
+  /* 🔹 Empty */
   if (bookings.length === 0) {
     return (
       <p className="text-center text-gray-500 text-lg">
-        You have no bookings yet ✈️
+        No bookings found ✈️
       </p>
     );
   }
@@ -54,7 +77,7 @@ const Booking = () => {
   return (
     <div className="max-w-5xl mx-auto px-4">
       <h1 className="text-3xl font-bold mb-8 text-center text-indigo-600">
-        My Bookings
+        {user.role === "ADMIN" ? "Bookings for Your Trips" : "My Bookings"}
       </h1>
 
       <div className="space-y-6">
@@ -83,20 +106,52 @@ const Booking = () => {
                 <p>
                   Status:{" "}
                   <span
-                    className={`font-semibold ${
-                      booking.status === "cancelled"
+                    className={`font-semibold ${booking.status === "cancelled"
                         ? "text-red-500"
                         : "text-green-600"
-                    }`}
+                      }`}
                   >
                     {booking.status}
                   </span>
                 </p>
+
+                {/* 👑 ADMIN controls */}
+                {user.role === "ADMIN" && (
+                  <div className="mt-3 space-y-2">
+                    <p className="text-gray-500 text-sm">
+                      Booked by: {booking.user.name} ({booking.user.email})
+                    </p>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleStatusUpdate(booking.id, "CONFIRMED")}
+                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                      >
+                        Confirm
+                      </button>
+
+                      <button
+                        onClick={() => handleStatusUpdate(booking.id, "REJECTED")}
+                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Reject
+                      </button>
+
+                      <button
+                        onClick={() => handleStatusUpdate(booking.id, "COMPLETED")}
+                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        Complete
+                      </button>
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
 
-            {/* Right actions */}
-            {booking.status !== "cancelled" && (
+            {/* 👤 USER ONLY: Cancel */}
+            {user.role === "USER" && booking.status !== "cancelled" && (
               <div className="flex items-center">
                 <button
                   onClick={() => handleCancel(booking.id)}

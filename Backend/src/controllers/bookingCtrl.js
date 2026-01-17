@@ -102,3 +102,75 @@ export const getMyBookings=async(req,res)=>{
         })
     }
 }
+
+export const getBookingsForAdmin = async (req, res) => {
+  try {
+    const bookings = await prisma.booking.findMany({
+      where: {
+        trip: {
+          createdById: req.user.id, // admin's trips
+        },
+      },
+     include: {
+        trip: {
+          select: {
+            name: true,
+            destination: true,
+            startDate: true,
+          },
+        },
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({ bookings });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch admin bookings" });
+  }
+};
+
+export const updateBookingStatus = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+    const { status } = req.body;
+
+    const allowedStatuses = ["CONFIRMED", "REJECTED", "COMPLETED"];
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { trip: true },
+    });
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.trip.createdById !== req.user.id) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    const updatedBooking = await prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: status.toLowerCase() },
+    });
+
+    res.status(200).json({
+      message: "Booking status updated",
+      booking: updatedBooking,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update booking status" });
+  }
+};

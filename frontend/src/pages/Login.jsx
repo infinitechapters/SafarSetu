@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../lib/authstore";
+import { loginUser } from "../lib/authstore.js";
+import { useAuth } from "../context/AuthContext.jsx"; 
 
 function Login() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -24,10 +26,10 @@ function Login() {
     setLoading(true);
 
     try {
-      await loginUser(formData);
-      alert("Login successful ✅");
-      navigate("/trips");
-    } catch (error) {
+      const data=await loginUser(formData);
+      setUser(data.user);
+      navigate("/home");
+    } catch (error) { 
       alert(error.response?.data?.message || "Invalid credentials");
     } finally {
       setLoading(false);
@@ -35,7 +37,9 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div>
+     
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <form
         onSubmit={handleSubmit}
         className="w-96 bg-white p-6 shadow-lg rounded-lg"
@@ -79,6 +83,7 @@ function Login() {
           </Link>
         </p>
       </form>
+    </div>
     </div>
   );
 }

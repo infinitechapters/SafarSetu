@@ -15,7 +15,7 @@ const Review = () => {
     alert("Review submitted ⭐");
     setRating(0);
     setComment("");
-    navigate("/home");
+    navigate("/");
   };
 
   return (

@@ -1,10 +1,14 @@
 import express from "express";
-import { auth} from "../middleware/auth.js";
-import { cancelBooking, createBooking, getMyBookings } from "../controllers/bookingCtrl.js";
+import { auth, roleAuthorize} from "../middleware/auth.js";
+import { cancelBooking, createBooking, getBookingsForAdmin, getMyBookings, updateBookingStatus } from "../controllers/bookingCtrl.js";
 const router= express.Router();
 
-router.post('/',auth,createBooking);
+router.post('/',auth,roleAuthorize('USER'),createBooking);
 router.get('/my',auth,getMyBookings);
-router.delete('/:bookingId/cancel',auth,cancelBooking);
+router.get("/admin",auth,roleAuthorize("ADMIN"),getBookingsForAdmin);
+router.put("/:bookingId/status",auth,roleAuthorize("ADMIN"),updateBookingStatus);
+
+router.delete('/:bookingId/cancel',auth,roleAuthorize('USER'),cancelBooking);
+
 
 export default router;

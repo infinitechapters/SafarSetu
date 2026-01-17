@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 //routes imports
 import userRoutes from "./routes/userRoutes.js";
@@ -8,6 +9,7 @@ import tripRoutes from "./routes/tripRoutes.js";
 import bookingRoute from "./routes/bookingRoute.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";  
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +21,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+app.use(cookieParser());
 
 app.get('/',(req,res)=>{
     res.send("Backend is running");
@@ -32,6 +35,7 @@ app.use('/api/trips',tripRoutes);
 app.use('/api/bookings',bookingRoute);
 app.use('/api/reviews',reviewRoutes);
 app.use('/api/payments',paymentRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found"  || "Server Error"});

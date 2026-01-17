@@ -3,10 +3,12 @@ import { createTrip, deleteTrip, getAllTrips, singleTrip, updateTrip } from '../
 import { auth, roleAuthorize } from '../middleware/auth.js';
 const router= express.Router();
 
-router.post('/',auth, roleAuthorize('admin'), createTrip);
-router.get('/',getAllTrips);
-router.get('/:id', singleTrip);
-router.delete('/:id',auth,roleAuthorize('admin'), deleteTrip);
-router.put('/:id', auth, roleAuthorize('admin'), updateTrip);
+router.post('/', auth, roleAuthorize('ADMIN'), createTrip);
+
+router.get('/', auth, getAllTrips);
+router.get('/:id', auth, singleTrip);
+
+router.delete('/:id', auth, roleAuthorize('ADMIN'), deleteTrip);
+router.put('/:id', auth, roleAuthorize('ADMIN'), updateTrip);
 
 export default router;

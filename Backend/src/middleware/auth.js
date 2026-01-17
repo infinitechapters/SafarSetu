@@ -3,10 +3,7 @@ import prisma from "../config/prisma.js";
 
 export const auth= async(req,res,next)=>{
 try{
-    let token;
-    if(req.headers.authorization && req.headers.authorization.startsWith("Bearer")){
-       token= req.headers.authorization.split(" ")[1];
-    }
+    const token = req.cookies?.token;
     if(!token){
         return res.status(401).json({
             message:"Not authorized"
@@ -28,14 +25,21 @@ try{
 }
 }
 
-export const roleAuthorize=(...roles)=>{
-  return(req,res,next)=>{
-     if(!roles.includes(req.user.role)){
-        return res.status(403).json({
-            message:"Forbidden: You don't have enough permission to access"
-        });
-     }
-        next();
-  }
-}
+export const roleAuthorize = (...roles) => {
+  return (req, res, next) => {
+    const userRole = req.user.role?.toUpperCase();
+
+    // console.log("User role:", userRole);
+    // console.log("Allowed roles:", roles);
+
+    if (!roles.includes(userRole)) {
+      return res.status(403).json({
+        message: "Forbidden: You don't have permission",
+      });
+    }
+
+    next();
+  };
+};
+
 
