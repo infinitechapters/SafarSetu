@@ -10,7 +10,7 @@ const Navbar = () => {
 
   const isAuthPage =
     location.pathname === "/login" ||
-    location.pathname === "/register";
+    location.pathname === "/";
 
   const handleLogout = async () => {
     setUser(null);
@@ -38,7 +38,7 @@ const Navbar = () => {
             <Link to="/login" className="hover:text-indigo-600">
               Login
             </Link>
-            <Link to="/register" className="hover:text-indigo-600">
+            <Link to="/" className="hover:text-indigo-600">
               Register
             </Link>
           </div>
@@ -97,7 +97,7 @@ const Navbar = () => {
           ) : (
             <div className="space-x-6 text-sm">
               <Link to="/login">Login</Link>
-              <Link to="/register">Register</Link>
+              <Link to="/">Register</Link>
             </div>
           )}
         </div>
