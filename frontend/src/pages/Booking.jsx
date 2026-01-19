@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getMyBookings,
   getAdminBookings,
@@ -8,29 +9,22 @@ import {
 import { useAuth } from "../context/AuthContext";
 
 const Booking = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const handleStatusUpdate = async (bookingId, status) => {
-  try {
-    await updateBookingStatus(bookingId, status);
-    alert(`Booking marked as ${status}`);
-    fetchBookings();
-  } catch (err) {
-    alert(err.response?.data?.message || "Status update failed");
-  }
-};
-
+  /* 📦 FETCH BOOKINGS */
   const fetchBookings = async () => {
-    try {
-      let res;
+    if (!user) return;
 
-      if (user?.role === "ADMIN") {
-        res = await getAdminBookings(); // 👑 admin bookings
-      } else {
-        res = await getMyBookings(); // 👤 user bookings
-      }
+    setLoading(true);
+    try {
+      const res =
+        user.role.toUpperCase() === "ADMIN"
+          ? await getAdminBookings()
+          : await getMyBookings();
 
       setBookings(res.data.bookings);
     } catch (err) {
@@ -41,8 +35,11 @@ const Booking = () => {
   };
 
   useEffect(() => {
-    if (user) fetchBookings();
-  }, [user]);
+    if (!authLoading && user) {
+      fetchBookings();
+    }
+  }, [authLoading, user]);
+
 
   const handleCancel = async (bookingId) => {
     try {
@@ -54,18 +51,52 @@ const Booking = () => {
     }
   };
 
-  /* 🔹 Loading */
+  /*ADMIN STATUS UPDATE */
+  const handleStatusUpdate = async (bookingId, status) => {
+    try {
+      await updateBookingStatus(bookingId, status);
+      alert(`Booking marked as ${status}`);
+      fetchBookings();
+    } catch (err) {
+      alert(err.response?.data?.message || "Status update failed");
+    }
+  };
+
+  const isTripCompleted = (startDate, duration) => {
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setDate(end.getDate() + duration);
+    return new Date() >= end;
+  };
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center h-60">
+        <p className="text-gray-600 animate-pulse">
+          Checking authentication...
+        </p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <p className="text-center text-gray-500">
+        Please login to view bookings
+      </p>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-60">
-        <p className="text-gray-600 text-lg animate-pulse">
+        <p className="text-gray-600 animate-pulse">
           Loading bookings...
         </p>
       </div>
     );
   }
 
-  /* 🔹 Empty */
   if (bookings.length === 0) {
     return (
       <p className="text-center text-gray-500 text-lg">
@@ -74,98 +105,144 @@ const Booking = () => {
     );
   }
 
-  return (
-    <div className="max-w-5xl mx-auto px-4">
-      <h1 className="text-3xl font-bold mb-8 text-center text-indigo-600">
-        {user.role === "ADMIN" ? "Bookings for Your Trips" : "My Bookings"}
-      </h1>
+ return (
+  <div className="max-w-6xl mx-auto px-4 py-10">
+      <h1 className="text-4xl font-extrabold mb-10 text-center text-indigo-600">
+      {user.role.toUpperCase() === "ADMIN"
+        ? "Bookings for Your Trips"
+        : "My Bookings"}
+    </h1>
 
-      <div className="space-y-6">
-        {bookings.map((booking) => (
-          <div
-            key={booking.id}
-            className="bg-white rounded-xl shadow p-5 flex flex-col sm:flex-row justify-between gap-4"
-          >
-            {/* Left info */}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">
-                {booking.trip.name}
-              </h2>
+    <div className="space-y-8">
+      {bookings.map((booking) => (
+        <div
+          key={booking.id}
+          className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
 
-              <p className="text-indigo-600 text-sm">
+          <div className="bg-linear-to-r from-indigo-500 to-purple-500 px-6 py-3 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-white">
+              {booking.trip.name}
+            </h2>
+
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${
+                booking.status === "cancelled"
+                  ? "bg-red-100 text-red-600"
+                  : booking.status === "confirmed"
+                  ? "bg-green-100 text-green-600"
+                  : booking.status === "rejected"
+                  ? "bg-red-100 text-red-600"
+                  : "bg-yellow-100 text-yellow-700"
+              }`}
+            >
+              {booking.status}
+            </span>
+          </div>
+
+          <div className="p-6 flex flex-col md:flex-row gap-6 justify-between">
+
+            <div className="space-y-2 text-sm text-gray-700">
+              <p className="text-indigo-600 font-medium">
                 {booking.trip.destination}
               </p>
+              <p>🪑 Seats Booked: {booking.seatsBooked}</p>
+              <p>💰 Total Amount: ₹{booking.totalAmount}</p>
+              <p>
+                📅 Start Date:{" "}
+                {new Date(
+                  booking.trip.startDate
+                ).toLocaleDateString()}
+              </p>
 
-              <div className="mt-3 text-sm text-gray-700 space-y-1">
-                <p>🪑 Seats: {booking.seatsBooked}</p>
-                <p>💰 Total: ₹{booking.totalAmount}</p>
-                <p>
-                  📅 Start Date:{" "}
-                  {new Date(booking.trip.startDate).toLocaleDateString()}
+              {user.role.toUpperCase() === "ADMIN" && (
+                <p className="text-gray-500 mt-2">
+                  Booked by{" "}
+                  <span className="font-medium">
+                    {booking.user.name}
+                  </span>{" "}
+                  ({booking.user.email})
                 </p>
-                <p>
-                  Status:{" "}
-                  <span
-                    className={`font-semibold ${booking.status === "cancelled"
-                        ? "text-red-500"
-                        : "text-green-600"
-                      }`}
-                  >
-                    {booking.status}
-                  </span>
-                </p>
-
-                {/* 👑 ADMIN controls */}
-                {user.role === "ADMIN" && (
-                  <div className="mt-3 space-y-2">
-                    <p className="text-gray-500 text-sm">
-                      Booked by: {booking.user.name} ({booking.user.email})
-                    </p>
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleStatusUpdate(booking.id, "CONFIRMED")}
-                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                      >
-                        Confirm
-                      </button>
-
-                      <button
-                        onClick={() => handleStatusUpdate(booking.id, "REJECTED")}
-                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
-                      >
-                        Reject
-                      </button>
-
-                      <button
-                        onClick={() => handleStatusUpdate(booking.id, "COMPLETED")}
-                        className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                      >
-                        Complete
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-              </div>
+              )}
             </div>
 
-            {/* 👤 USER ONLY: Cancel */}
-            {user.role === "USER" && booking.status !== "cancelled" && (
-              <div className="flex items-center">
-                <button
-                  onClick={() => handleCancel(booking.id)}
-                  className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
+           
+            <div className="flex flex-col gap-3 min-w-45">
+              {user.role.toUpperCase() === "ADMIN" && (
+                <>
+                  <button
+                    onClick={() =>
+                      handleStatusUpdate(
+                        booking.id,
+                        "confirmed"
+                      )
+                    }
+                    className="bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                  >
+                    Confirm
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      handleStatusUpdate(
+                        booking.id,
+                        "rejected"
+                      )
+                    }
+                    className="bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition"
+                  >
+                    Reject
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      navigate(
+                        `/admin/trip/${booking.tripId}/reviews`
+                      )
+                    }
+                    className="bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition"
+                  >
+                    View Reviews
+                  </button>
+                </>
+              )}
+
+              {/* USER ACTIONS */}
+              {user.role.toUpperCase() === "USER" &&
+                booking.status !== "cancelled" && (
+                  <>
+                    <button
+                      onClick={() =>
+                        handleCancel(booking.id)
+                      }
+                      className="bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition"
+                    >
+                      Cancel Booking
+                    </button>
+
+                    {isTripCompleted(
+                      booking.trip.startDate,
+                      booking.trip.duration
+                    ) && (
+                      <button
+                        onClick={() =>
+                          navigate(
+                            `/review/${booking.trip.id}`
+                          )
+                        }
+                        className="bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                      >
+                        Add Review ✍️
+                      </button>
+                    )}
+                  </>
+                )}
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
-  );
+  </div>
+);
 };
 
 export default Booking;

@@ -1,29 +1,55 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { createBooking } from "../lib/bookingApi";
 
 const Payment = () => {
-  const [method, setMethod] = useState("card");
-  const [loading, setLoading] = useState(false);
+  const { state } = useLocation();
   const navigate = useNavigate();
 
-  const handlePayment = () => {
-    setLoading(true);
+  const { tripId, seatsBooked } = state || {};
 
-    // Simulate payment success
-    setTimeout(() => {
+  const [method, setMethod] = useState("card");
+  const [loading, setLoading] = useState(false);
+
+  if (!tripId || !seatsBooked) {
+    return (
+      <p className="text-center text-red-500 mt-10">
+        Invalid payment session
+      </p>
+    );
+  }
+
+  const handlePayment = async () => {
+    try {
+      setLoading(true);
+
+      await new Promise((res) => setTimeout(res, 1500));
+
+     //booking
+      await createBooking({
+        tripId,
+        seatsBooked,
+      });
+
+      alert("Payment & Booking successful 🎉");
+      navigate("/bookings");
+    } catch (err) {
+      alert(err.response?.data?.message || "Payment failed");
+    } finally {
       setLoading(false);
-      alert("Payment successful 💳");
-      navigate("/review");
-    }, 1500);
+    }
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow">
+    <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow mt-10">
       <h1 className="text-2xl font-bold text-center text-indigo-600 mb-6">
         Payment
       </h1>
 
-      {/* Payment methods */}
+      <p className="text-center text-gray-600 mb-4">
+        Seats Selected: <strong>{seatsBooked}</strong>
+      </p>
+
       <div className="space-y-4">
         <label className="flex items-center gap-3 cursor-pointer">
           <input
@@ -53,7 +79,6 @@ const Payment = () => {
         </label>
       </div>
 
-      {/* Fake card inputs */}
       {method === "card" && (
         <div className="mt-4 space-y-3">
           <input

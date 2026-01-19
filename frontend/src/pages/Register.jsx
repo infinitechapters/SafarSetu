@@ -9,7 +9,7 @@ function Register() {
     name: "",
     email: "",
     password: "",
-    role: "user", // default role
+    role: "user", 
   });
 
   const [loading, setLoading] = useState(false);
@@ -76,7 +76,6 @@ function Register() {
           required
         />
 
-        {/* Role select */}
         <select
           name="role"
           value={formData.role}

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { createBooking } from "../lib/bookingApi";
 import { getAllTrips } from "../lib/tripApi";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -24,20 +23,22 @@ const Trips = () => {
     fetchTrips();
   }, []);
 
-  const handleBooking = async (tripId) => {
-    try {
-      await createBooking({ tripId, seatsBooked: 1 });
-      alert("Booking successful 🎉");
-    } catch (err) {
-      alert(err.response?.data?.message || "Booking failed");
-    }
+  const handleBooking = (tripId) => {
+    navigate(`/select_seats/${tripId}`);
+  };
+
+  const canReview = (trip) => {
+    const start = new Date(trip.startDate);
+    const end = new Date(start);
+    end.setDate(start.getDate() + trip.duration);
+    return new Date() > end;
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-60">
-        <p className="text-gray-600 text-lg animate-pulse">
-          Loading trips...
+      <div className="flex justify-center items-center h-64">
+        <p className="text-gray-500 text-lg animate-pulse">
+          Finding the best trips for you...
         </p>
       </div>
     );
@@ -45,88 +46,102 @@ const Trips = () => {
 
   if (trips.length === 0) {
     return (
-      <p className="text-center text-gray-500">
-        No trips available
+      <p className="text-center text-gray-500 mt-20">
+        No trips available right now 🌍
       </p>
     );
   }
 
-  const canReview = (trip) => {
-  const currentDate = new Date();
-  const startDate = new Date(trip.startDate);
-  const endDate = new Date(startDate);
-  endDate.setDate(startDate.getDate() + trip.duration);
-  return currentDate > endDate;
-};
-
   return (
-    <div className="max-w-7xl mx-auto px-4">
-      <h1 className="text-3xl font-bold mb-8 text-center text-indigo-600">
-        Explore Trips ✈️
-      </h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {trips.map((trip) => (
-  <div
-    key={trip.id}
-    className="bg-white rounded-xl shadow hover:shadow-lg transition"
-  >
-    <div className="p-5">
-      <h2 className="text-xl font-semibold text-gray-800">
-        {trip.name}
-      </h2>
-
-      <p className="text-sm text-indigo-600 mt-1">
-        {trip.destination}
-      </p>
-
-      <p className="text-gray-600 text-sm mt-3 line-clamp-3">
-        {trip.description}
-      </p>
-
-      <div className="mt-4 text-sm text-gray-700 space-y-1">
-        <p>💰 Price: ₹{trip.price}</p>
-        <p>🪑 Seats Left: {trip.availableSeats}</p>
+    <div className="max-w-7xl mx-auto px-4 py-10">
+     
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-extrabold text-indigo-600 mb-2">
+          Explore Trips ✈️
+        </h1>
+        <p className="text-gray-600">
+          Discover destinations, experiences & memories
+        </p>
       </div>
 
-      {/* 👤 USER ACTIONS */}
-      {user?.role === "USER" && (
-        <>
-          <button
-            disabled={trip.availableSeats === 0}
-            onClick={() => handleBooking(trip.id)}
-            className="mt-5 w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 disabled:bg-gray-400"
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        {trips.map((trip) => (
+          <div
+            key={trip.id}
+            className="group bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
           >
-            {trip.availableSeats === 0 ? "Sold Out" : "Book Now"}
-          </button>
+            {/* IMAGE UPLOAD IMPLEMENTATION */}
+            <div className="relative h-44">
+              {trip.imageUrl ? (
+                <img
+                  src={trip.imageUrl}
+                  alt={trip.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-linear-to-r from-indigo-500 to-purple-500" />
+              )}
 
-          {canReview(trip) ? (
-            <button
-              onClick={() => navigate(`/review/${trip.id}`)}
-              className="mt-3 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
-            >
-              Write Review ✍️
-            </button>
-          ) : (
-            <button
-              disabled
-              className="mt-3 w-full bg-gray-300 text-gray-700 py-2 rounded-lg cursor-not-allowed"
-            >
-              Ongoing Trip 🚌
-            </button>
-          )}
-        </>
-      )}
+              <div className="absolute bottom-3 left-3 bg-white/90 px-3 py-1 rounded-full text-sm font-semibold text-indigo-600">
+                {trip.destination}
+              </div>
 
-      {/* 👮 ADMIN VIEW (NO BOOKING / REVIEW) */}
-      {user?.role === "ADMIN" && (
-        <p className="mt-4 text-sm text-gray-500 italic">
-          Admin view – booking disabled
-        </p>
-      )}
-    </div>
-  </div>
-))}
+              <div className="absolute top-3 right-3 bg-white/90 px-3 py-1 rounded-full text-sm font-bold text-gray-800">
+                ₹{trip.price}
+              </div>
+            </div>
+
+
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-1">
+                {trip.name}
+              </h2>
+
+              <p className="text-sm text-gray-600 line-clamp-2">
+                {trip.description || "An unforgettable travel experience awaits you."}
+              </p>
+
+              <div className="mt-4 flex justify-between text-sm text-gray-700">
+                <span>🪑 Seats Left: {trip.availableSeats}</span>
+                <span>⏳ {trip.duration} days</span>
+              </div>
+
+              {user?.role.toUpperCase() === "USER" && (
+                <div className="mt-6 space-y-3">
+                  <button
+                    disabled={trip.availableSeats === 0}
+                    onClick={() => handleBooking(trip.id)}
+                    className="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold hover:bg-indigo-700 disabled:bg-gray-400 transition"
+                  >
+                    {trip.availableSeats === 0 ? "Sold Out" : "Select Seats"}
+                  </button>
+
+                  {canReview(trip) && (
+                    <button
+                      onClick={() => navigate(`/review/${trip.id}`)}
+                      className="w-full bg-green-600 text-white py-2.5 rounded-xl hover:bg-green-700 transition"
+                    >
+                      Write Review ✍️
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => navigate(`/trip/${trip.id}/reviews`)}
+                    className="w-full border border-indigo-600 text-indigo-600 py-2.5 rounded-xl hover:bg-indigo-50 transition"
+                  >
+                    View Reviews
+                  </button>
+                </div>
+              )}
+
+              {user?.role.toUpperCase() === "ADMIN" && (
+                <div className="mt-5 text-sm text-gray-400 italic text-center">
+                  Admin view — booking disabled
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

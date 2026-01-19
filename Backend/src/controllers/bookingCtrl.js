@@ -53,7 +53,7 @@ try{
         if(!booking){
         throw new Error("Booking not found");
       }
-      if( booking.userId !== req.user.id && req.user.role !== 'admin'){
+      if( booking.userId !== req.user.id && req.user.role.toUpperCase() !== 'ADMIN'){
         throw new Error("Access Denied");
       }
       if(booking.status ==='cancelled'){
@@ -117,6 +117,7 @@ export const getBookingsForAdmin = async (req, res) => {
             name: true,
             destination: true,
             startDate: true,
+            duration:true,
           },
         },
         user: {
@@ -142,7 +143,7 @@ export const updateBookingStatus = async (req, res) => {
     const { bookingId } = req.params;
     const { status } = req.body;
 
-    const allowedStatuses = ["CONFIRMED", "REJECTED", "COMPLETED"];
+    const allowedStatuses = ["confirmed", "rejected", "completed","pending"];
 
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
@@ -163,7 +164,7 @@ export const updateBookingStatus = async (req, res) => {
 
     const updatedBooking = await prisma.booking.update({
       where: { id: bookingId },
-      data: { status: status.toLowerCase() },
+      data: { status:status},
     });
 
     res.status(200).json({

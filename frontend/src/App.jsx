@@ -9,11 +9,14 @@ import Register from "./pages/Register";
 import Payment from "./pages/Payment";
 import Review from "./pages/Review";
 import CreateTrip from "./pages/CreateTrip";
+import SelectSeats from "./pages/SelectSeats";
+import AdminTripReviews from "./pages/AdminTripReviews";
+import ViewReview from "./pages/ViewReview";
 
 function App() {
   return (
     <>
-      <Navbar /> {/* ✅ ONE navbar for whole app */}
+      <Navbar /> 
 
       <Routes>
         <Route path="/" element={<Register />} />
@@ -23,9 +26,13 @@ function App() {
 
         <Route path="/trips" element={<Trips />} />
         <Route path="/bookings" element={<Booking />} />
-        <Route path="/payments" element={<Payment />} />
-        <Route path="/review" element={<Review />} />
+        <Route path="/select_seats/:tripId" element={<SelectSeats/>} />
+        <Route path="/payment" element={<Payment />} />
+        <Route path="/review/:tripId" element={<Review />} />
+        <Route path="/trip/:tripId/reviews" element={<ViewReview />} />
+        <Route path="/admin/trip/:tripId/reviews" element={<AdminTripReviews/>}/>
         <Route path="/createTrip" element={<CreateTrip />} />
+
       </Routes>
     </>
   );

@@ -33,7 +33,7 @@ const PORT = process.env.PORT || 5000;
 app.use("/api/users",userRoutes);
 app.use('/api/trips',tripRoutes);
 app.use('/api/bookings',bookingRoute);
-app.use('/api/reviews',reviewRoutes);
+app.use('/api/review',reviewRoutes);
 app.use('/api/payments',paymentRoutes);
 app.use("/api/admin", adminRoutes);
 
