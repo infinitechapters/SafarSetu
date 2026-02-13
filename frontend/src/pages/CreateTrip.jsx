@@ -140,6 +140,9 @@
 import { useState } from "react";
 import { createTrip } from "../lib/tripApi";
 import { useNavigate } from "react-router-dom";
+import { uploadImage } from "../lib/cloudinary";
+import { api } from "../lib/axios";
+
 
 const CreateTrip = () => {
   const navigate = useNavigate();
@@ -173,28 +176,34 @@ const CreateTrip = () => {
     setPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      // ⚠️ Image is optional
-      await createTrip({
-        ...formData,
-        price: Number(formData.price),
-        duration: Number(formData.duration),
-        totalSeats: Number(formData.totalSeats),
-        //image implementation later
-      });
+  try {
+    let imageUrl = "";
 
-      alert("Trip created successfully 🎉");
-      navigate("/trips");
-    } catch (error) {
-      alert(error.response?.data?.message || "Failed to create trip");
-    } finally {
-      setLoading(false);
+    if (image) { // ⭐ correct variable
+      imageUrl = await uploadImage(image);
     }
-  };
+
+    await createTrip({
+      ...formData,
+      price: Number(formData.price),
+      duration: Number(formData.duration),
+      totalSeats: Number(formData.totalSeats),
+      image: imageUrl, 
+    });
+
+    alert("Trip created successfully 🎉");
+    navigate("/trips");
+  } catch (error) {
+    alert(error.response?.data?.message || "Failed to create trip");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">

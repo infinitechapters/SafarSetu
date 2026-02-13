@@ -2,13 +2,44 @@ import prisma from "../config/prisma.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
  
+//Get profile
+// export const getMe = async (req, res) => {
+//   res.json({
+//       id: req.user.id,
+//       name: req.user.name,
+//       email: req.user.email,
+//       role: req.user.role?.toUpperCase() ,
+//   });
+// };
 export const getMe = async (req, res) => {
-  res.json({
-      id: req.user.id,
-      name: req.user.name,
-      email: req.user.email,
-      role: req.user.role?.toUpperCase() ,
-  });
+  try {
+     if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        gender: true,
+        dob: true,
+        address: true,
+        nationality: true,
+        role: true,
+        profileImage: true,
+        createdAt: true,
+      },
+    });
+     if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    console.log("GETME ERROR:", err); 
+    return res.status(500).json({ message: "Failed to fetch profile" });
+  }
 };
 
 export const register= async(req,res)=>{
@@ -53,6 +84,7 @@ export const register= async(req,res)=>{
     }
 };
 
+//Login 
 export const login = async(req,res)=>{
     try{
     const {email,password}= req.body;
@@ -96,6 +128,53 @@ export const login = async(req,res)=>{
         });
     }
 }
+
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, phone, gender, dob, address, nationality } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        phone,
+        gender,
+        dob: dob ? new Date(dob) : null,
+        address,
+        nationality,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        gender: true,
+        dob: true,
+        address: true,
+        nationality: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ message: "Profile update failed" });
+  }
+};
+
+export const profileImageUpdate = async (req, res) => {
+  const { profileImage } = req.body;
+
+  const user = await prisma.user.update({
+    where: { id: req.user.id },
+    data: { profileImage },
+  });
+
+  res.json(user);
+};
+
 
 export const logout = (req, res) => {
   res.clearCookie("token", {

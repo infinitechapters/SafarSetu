@@ -38,9 +38,17 @@ model User{
   password   String
   role       String    
 
+  profileImage String?
+
   trips     Trip[]    @relation("UserTrips")
   bookings   Booking[]
   reviews    Review[]
+
+  phone       String?
+  gender      String?
+  dob         DateTime?
+  address     String?
+  nationality String?
 
   createdAt DateTime @default(now())
 }
@@ -63,6 +71,8 @@ model Trip{
   reviews  Review[]
 
   createdAt      DateTime  @default(now())
+
+  image String?
 }
 
 model Booking{

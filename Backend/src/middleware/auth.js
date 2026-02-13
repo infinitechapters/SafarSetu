@@ -10,16 +10,18 @@ try{
         })
     }
     const decode= jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.user= await prisma.user.findUnique({where:{id:decode.id}});
+    const user= await prisma.user.findUnique({where:{id:decode.id}});
 
-    if(!req.user){
+    if(!user){
         return res.status(401).json({
             message:"Not authorized"
         })
     }
+    req.user = user;
     next();
     
 }catch(error){
+    console.log("AUTH ERROR:", error);
     return res.status(401).json({
         message:"Not authorized"});
 }

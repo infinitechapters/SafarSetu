@@ -18,6 +18,7 @@ export const createTrip= async(req,res)=>{
         duration,
         startDate: new Date(startDate),
         totalSeats,
+        image: req.body.image,
         availableSeats: totalSeats,
         createdById: req.user.id,
       }});

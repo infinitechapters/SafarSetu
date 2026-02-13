@@ -114,7 +114,7 @@ const Booking = () => {
     </h1>
 
     <div className="space-y-8">
-      {bookings.map((booking) => (
+      {bookings.filter((booking) => booking.status !== "cancelled").map((booking) => (
         <div
           key={booking.id}
           className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
@@ -167,7 +167,7 @@ const Booking = () => {
 
            
             <div className="flex flex-col gap-3 min-w-45">
-              {user.role.toUpperCase() === "ADMIN" && (
+              {user.role.toUpperCase() === "ADMIN" && booking.status === "pending" && (
                 <>
                   <button
                     onClick={() =>
@@ -192,8 +192,11 @@ const Booking = () => {
                   >
                     Reject
                   </button>
-
-                  <button
+                </>
+)}
+                {user.role.toUpperCase() === "ADMIN" &&(
+                    <>
+                    <button
                     onClick={() =>
                       navigate(
                         `/admin/trip/${booking.tripId}/reviews`
@@ -203,8 +206,9 @@ const Booking = () => {
                   >
                     View Reviews
                   </button>
-                </>
-              )}
+                    </>
+                   )
+                  }
 
               {/* USER ACTIONS */}
               {user.role.toUpperCase() === "USER" &&

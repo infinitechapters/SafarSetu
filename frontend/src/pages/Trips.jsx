@@ -70,13 +70,13 @@ const Trips = () => {
             key={trip.id}
             className="group bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
           >
-            {/* IMAGE UPLOAD IMPLEMENTATION */}
+           
             <div className="relative h-44">
-              {trip.imageUrl ? (
+              {trip.image ? (
                 <img
-                  src={trip.imageUrl}
+                  src={trip.image}
                   alt={trip.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover brightness-100 contrast-110"
                 />
               ) : (
                 <div className="w-full h-full bg-linear-to-r from-indigo-500 to-purple-500" />

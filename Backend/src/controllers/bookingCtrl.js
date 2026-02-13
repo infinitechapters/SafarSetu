@@ -162,6 +162,12 @@ export const updateBookingStatus = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
+    if (booking.status !== "pending") {
+      return res.status(400).json({
+        message: "Booking status already finalized",
+      });
+    }
+
     const updatedBooking = await prisma.booking.update({
       where: { id: bookingId },
       data: { status:status},
