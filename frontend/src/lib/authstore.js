@@ -7,7 +7,7 @@ export const registerUser = async (userData) => {
 
 export const loginUser = async (credentials) => {
   const res = await api.post("/users/login", credentials, {
-    withCredentials: true, // force include
+    withCredentials: true, 
   });
   return res.data;
 };

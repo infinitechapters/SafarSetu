@@ -108,7 +108,7 @@ const Navbar = () => {
           ) : (
             <div className="space-x-6 text-sm">
               <Link to="/login">Login</Link>
-              <Link to="/">Register</Link>
+              <Link to="/register">Register</Link>
             </div>
           )}
         </div>
