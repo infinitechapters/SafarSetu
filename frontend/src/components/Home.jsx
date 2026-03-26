@@ -629,7 +629,7 @@ export default function Home() {
       `}</style>
 
       {/* NAV */}
-      <NavBar scrollY={scrollY} />
+      {/* <NavBar scrollY={scrollY} /> */}
 
       {/* HERO */}
       <section className="hero" ref={heroRef}>

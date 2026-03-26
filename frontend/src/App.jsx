@@ -17,7 +17,7 @@ import Profile from "./components/Profile";
 function App() {
   return (
     <>
-      {/* <Navbar />  */}
+      <Navbar /> 
 
       <Routes>
         <Route path="/" element={<Home />} />
