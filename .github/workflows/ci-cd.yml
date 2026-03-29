@@ -16,6 +16,6 @@ steps:
 
   - name: Build Docker Image
     run: docker build -t safarsetu .
-```
+
   - name: Run Docker Container test
     run: docker run -d -p 8080:8080 safarsetu
