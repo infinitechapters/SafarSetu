@@ -1,23 +1,23 @@
 name: Docker CI Pipeline
 
 on:
-push:
-branches:
-- main
+  push:
+    branches:
+      - main
 
 jobs:
-docker-build:
-runs-on: ubuntu-latest
+  docker-build:
+    runs-on: ubuntu-latest
 
-steps:
-  - name: Checkout Code
-    uses: actions/checkout@v3
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-  - name: Run Docker Compose
-    run: |
-      docker compose up --build -d
-      sleep 10
-      docker compose ps
+      - name: Run Docker Compose
+        run: |
+          docker compose up --build -d
+          sleep 10
+          docker compose ps
 
-  - name: Show Logs
-    run: docker compose logs
+      - name: Show Logs
+        run: docker compose logs
