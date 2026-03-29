@@ -1,0 +1,21 @@
+name: Docker CI Pipeline
+
+on:
+push:
+branches:
+- main
+
+jobs:
+docker-build:
+runs-on: ubuntu-latest
+
+```
+steps:
+  - name: Checkout Code
+    uses: actions/checkout@v3
+
+  - name: Build Docker Image
+    run: docker build -t safarsetu .
+```
+  - name: Run Docker Container test
+    run: docker run -d -p 8080:8080 safarsetu
