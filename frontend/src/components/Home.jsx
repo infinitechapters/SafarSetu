@@ -900,7 +900,7 @@ import goa from "../assets/goa.jpeg";
 import manali from "../assets/manali.jpeg";
 import santorini from "../assets/santorini.jpeg";
 import maldives from "../assets/maldives.jpeg";
-import about_hero from "../public/images/about_hero.jpeg";
+// import about_hero from "../public/images/about_hero.jpeg";
 import img2 from "../assets/img2.jpeg"; 
 import img3 from "../assets/img3.jpeg";
 
@@ -1635,7 +1635,7 @@ export default function Home() {
               {/* This is the LCP element — must be eager + high priority + discoverable ASAP */}
               <img
                 className="about-img"
-                src={about_hero}
+                src="/images/about_hero.jpeg" 
                 alt="travel"
                 loading="eager"
                 fetchPriority="high"
