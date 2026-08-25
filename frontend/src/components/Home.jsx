@@ -901,7 +901,7 @@ import manali from "../assets/manali.jpeg";
 import santorini from "../assets/santorini.jpeg";
 import maldives from "../assets/maldives.jpeg";
 import img2 from "../assets/img2.webp"; 
-import img3 from "../assets/img3.jpeg";
+import img3 from "../assets/img3.jpg";
 
 const DESTINATIONS = [
   {
