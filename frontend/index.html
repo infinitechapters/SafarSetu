@@ -10,6 +10,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
+    <!-- Preconnect to backend API -->
+    <link rel="preconnect" href="https://safarsetux.onrender.com" />
+
     <!-- Real <link> instead of a JS-injected @import: discoverable immediately, not render-blocking on JS -->
     <link
       href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap"
@@ -17,8 +20,8 @@
     />
 
     <!-- Preload the LCP image (About section hero image) at high priority.
-         This file must live in /public/images/ so the path is stable pre-JS. -->
-    <link rel="preload" as="image" href="/images/about-hero.jpeg" fetchpriority="high" />
+         Path corrected to match actual file being served. -->
+    <link rel="preload" as="image" href="/images/about_hero.webp" fetchpriority="high" />
   </head>
   <body>
     <div id="root"></div>
