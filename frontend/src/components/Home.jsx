@@ -900,7 +900,7 @@ import goa from "../assets/goa.jpeg";
 import manali from "../assets/manali.jpeg";
 import santorini from "../assets/santorini.jpeg";
 import maldives from "../assets/maldives.jpeg";
-import img1 from "../assets/img1.jpeg";
+import about_hero from "../public/images/about-hero.jpeg";
 import img2 from "../assets/img2.jpeg"; 
 import img3 from "../assets/img3.jpeg";
 
@@ -1025,7 +1025,16 @@ export default function Home() {
   const heroRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -1623,15 +1632,23 @@ export default function Home() {
           </div>
           <div className="about-img-grid">
             <div className="about-img-wrap">
-              <img className="about-img" src={img1} alt="travel" loading="lazy" />
+              {/* This is the LCP element — must be eager + high priority + discoverable ASAP */}
+              <img
+                className="about-img"
+                src={about_hero}
+                alt="travel"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+              />
               <div className="about-img-overlay" />
             </div>
             <div className="about-img-wrap">
-              <img className="about-img" src={img2} alt="travel" loading="lazy" />
+              <img className="about-img" src={img2} alt="travel" loading="lazy" decoding="async" />
               <div className="about-img-overlay" />
             </div>
             <div className="about-img-wrap">
-              <img className="about-img" src={img3} alt="travel" loading="lazy" />
+              <img className="about-img" src={img3} alt="travel" loading="lazy" decoding="async" />
               <div className="about-img-overlay" />
             </div>
           </div>
